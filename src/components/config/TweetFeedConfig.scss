@@ -1,0 +1,29 @@
+.slide {
+  &-enter {
+    transform: translateY(-50px);
+
+    &-active {
+      max-height: 1px;
+      opacity: 0;
+      transition: max-height 1s, opacity 1s;
+    }
+
+    &-to {
+      max-height: 500px;
+      opacity: 1;
+    }
+  }
+
+  &-leave {
+    &-active {
+      max-height: 500px;
+      transition: max-height 1s;
+    }
+
+    &-to {
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-100px);
+    }
+  }
+}

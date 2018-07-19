@@ -1,0 +1,21 @@
+.fade {
+  &-enter {
+    opacity: 0;
+    transform: translateY(1000px);
+
+    &-active {
+      transition: all 1s;
+    }
+  }
+
+  &-leave {
+    &-active {
+      transition: all 1s;
+    }
+
+    &-to {
+      opacity: 0;
+      transform: translateY(-1000px);
+    }
+  }
+}
