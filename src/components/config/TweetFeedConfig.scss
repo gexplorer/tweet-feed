@@ -1,3 +1,42 @@
+$modal-bg: rgba(0, 0, 0, .7);
+
+.modal {
+  &.show {
+    background: $modal-bg;
+    display: block;
+  }
+}
+
+$morph-delay: 1s;
+.morph {
+  overflow: hidden;
+  &-enter {
+    &-active {
+      max-height: 1px;
+      opacity: 0;
+      transition: all 2s;
+    }
+
+    &-to {
+      max-height: 400px;
+      opacity: 1;
+    }
+  }
+
+  &-leave {
+    &-active {
+      max-height: 300px;
+      transition: all 500ms;
+    }
+
+    &-to {
+      max-height: 0;
+      opacity: 0;
+    }
+  }
+}
+
+
 .slide {
   &-enter {
     transform: translateY(-50px);

@@ -3,6 +3,10 @@ import { SimpleTweet } from '../../SimpleTweet';
 import TweetFeedConfigItem from './TweetFeedConfigItem';
 import TweetFeedConfigMenu from './TweetFeedConfigMenu';
 import io from 'socket.io-client';
+import { Application, Service  } from '@feathersjs/feathers';
+
+import feathers from '@feathersjs/feathers';
+import socketio from '@feathersjs/socketio-client';
 
 @Component({
     components: {
@@ -12,20 +16,65 @@ import io from 'socket.io-client';
 })
 export default class TweetFeedConfig extends Vue {
     public online: boolean = false;
+    public main: boolean = false;
     public timer: number = 0;
     public active: boolean = false;
-    public tweets: SimpleTweet[] = [];
-    public max: number = 50;
-    public delay: number = 10000;
-    public selectedTweet: SimpleTweet | null = null;
+    public simpleTweets: SimpleTweet[] = [];
+    public max: number = 5;
+    public delay: number = 3000;
     public blacklist: string[] = [];
-    private socket: any = io.connect('localhost:3000');
+    private starting: boolean = false;
+
+    private socket: any = io.connect(':3030');
+    private app: Application = feathers();
+
+    private tweetService: Service<SimpleTweet>;
+    private controlService: Service<any>;
+    private statusService: Service<any>;
+
+    constructor() {
+        super();
+        this.app.configure(socketio(this.socket));
+        this.tweetService = this.app.service('tweets');
+        this.controlService = this.app.service('control');
+        this.statusService = this.app.service('status');
+    }
 
     public mounted() {
-        this.stop();
-        this.socket.on('addTweet', (tweet: SimpleTweet) => this.tweets.unshift(tweet));
-        this.socket.on('selectTweet', (tweet: SimpleTweet) => this.selectedTweet = tweet);
-        this.socket.on('updateBlacklist', (blacklist: string[]) => this.blacklist = blacklist);
+        this.tweetService
+            .on('created', (tweet: SimpleTweet) => {
+                this.simpleTweets.push(tweet);
+            });
+
+        this.tweetService
+            .on('patched', (tweet: SimpleTweet) => {
+                const index = this.simpleTweets.findIndex((t) => t._id === tweet._id);
+
+                if (index >= 0) {
+                    this.$set(this.simpleTweets[index], 'blocked', tweet.blocked);
+                    this.$set(this.simpleTweets[index], 'selected', tweet.selected);
+                }
+            });
+
+        this.statusService.on('created', () => {
+            this.starting = false;
+            this.active = true;
+        });
+
+        this.statusService.on('removed', () => {
+            this.active = false;
+        });
+
+        this.tweetService
+            .find({
+                query: {
+                    $sort: { date: -1 },
+                },
+            })
+            .then((tweets) => {
+                this.simpleTweets = tweets as SimpleTweet[];
+            });
+
         this.socket.on('connect', () => {
             this.online = true;
         });
@@ -36,50 +85,42 @@ export default class TweetFeedConfig extends Vue {
     }
 
     get blockedTweets(): SimpleTweet[] {
-        return this.tweets
-            .filter((tweet) => this.blacklist.indexOf(tweet.username) >= 0);
+        return this.simpleTweets
+            .filter((tweet) => tweet.blocked);
     }
 
     get activeTweets(): SimpleTweet[] {
-        return this.tweets
-            .filter((tweet) => this.blacklist.indexOf(tweet.username) < 0)
+        return this.simpleTweets
+            .filter((tweet) => !tweet.blocked)
+            .sort((a, b) => a.date < b.date ? 1 : -1)
             .slice(0, this.max);
     }
 
-    get selectedId() {
-        return this.selectedTweet && this.selectedTweet.id;
+    get selectedTweet(): SimpleTweet {
+        return this.simpleTweets.filter((tweet) => tweet.selected)[0];
     }
 
     get selectedIndex(): number {
-        return this.activeTweets.findIndex((tweet) => tweet.id === this.selectedId);
-    }
-
-    get prevIndex(): number {
-        const prevIndex = this.selectedIndex + 1;
-        return prevIndex < this.activeTweets.length ? prevIndex : 0;
-    }
-
-    get nextIndex(): number {
-        const nextIndex = this.selectedIndex - 1;
-        return nextIndex >= 0 ? nextIndex : this.activeTweets.length - 1;
+        let selectedIndex = this.activeTweets.indexOf(this.selectedTweet);
+        if (selectedIndex < 0) {
+            selectedIndex = 0;
+        }
+        return selectedIndex;
     }
 
     get nextTweets(): SimpleTweet[] {
-        let currentIndex = this.selectedIndex;
-        if (currentIndex < 0) {
-            currentIndex = 9999;
-        }
         return this.activeTweets
-            .filter((item, index) => index < currentIndex)
-            .sort((a, b) => a.date >= b.date ? 1 : -1);
+            .filter((tweet, index) => index > this.selectedIndex);
     }
 
     get prevTweets(): SimpleTweet[] {
-        if (this.selectedIndex < 0) {
-            return [];
-        }
         return this.activeTweets
-            .filter((item, index) => index > this.selectedIndex);
+            .filter((tweet, index) => index < this.selectedIndex)
+            .sort((a, b) => a.date > b.date ? 1 : -1);
+    }
+
+    get modalClass(): string {
+        return this.starting ? 'show' : '';
     }
 
     public updateMax(value: number) {
@@ -91,46 +132,52 @@ export default class TweetFeedConfig extends Vue {
     }
 
     public start() {
-        this.active = true;
-        this.nextTweet();
-        this.timer = window.setInterval(() => {
-            if (this.active) {
-                this.nextTweet();
-            }
-        }, this.delay);
+        this.starting = true;
+        this.active = false;
+    }
+
+    public doStart() {
+        this.starting = false;
+        this.statusService
+            .create({}, {query: {
+                max: this.max,
+                delay: this.delay,
+            }});
     }
 
     public stop() {
-        this.active = false;
-        window.clearInterval(this.timer);
+        this.statusService
+            .remove(null);
     }
 
     public prevTweet() {
-        const tweet = this.activeTweets[this.prevIndex];
-        this.selectTweet(tweet);
+        this.controlService
+            .remove(null, {query: {max: this.max}})
+            .then((tweet: SimpleTweet) => this.select(tweet));
     }
 
     public nextTweet() {
-        const tweet = this.activeTweets[this.nextIndex];
-        this.selectTweet(tweet);
+        this.controlService
+            .create({}, {query: {max: this.max}})
+            .then((tweet: SimpleTweet) => this.select(tweet));
     }
 
     public pinTweet(tweet: SimpleTweet) {
         this.stop();
-        this.selectTweet(tweet);
+        this.select(tweet);
     }
 
-    public selectTweet(tweet: SimpleTweet) {
-        // this.selectedTweet = tweet;
-        this.socket.emit('selectTweet', tweet);
+    public select(tweet: SimpleTweet) {
+        this.tweetService
+            .patch(tweet._id, {
+                selected: !tweet.selected,
+            });
     }
 
-    public blockUser(username: string) {
-        // this.blacklist.push(username);
-        this.socket.emit('blockUser', username);
-    }
-
-    public unblockUser(username: string) {
-        this.socket.emit('unblockUser', username);
+    public block(tweet: SimpleTweet) {
+        this.tweetService
+            .patch(tweet._id, {
+                blocked: !tweet.blocked,
+            });
     }
 }

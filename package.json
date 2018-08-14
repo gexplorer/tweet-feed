@@ -1,37 +1,45 @@
 {
-  "name": "tweet-feed",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
-  },
-  "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.2",
-    "@fortawesome/free-solid-svg-icons": "^5.2.0",
-    "@fortawesome/vue-fontawesome": "^0.1.1",
-    "bootstrap": "^4.1.2",
-    "font-awesome": "^4.7.0",
-    "moment": "^2.22.2",
-    "socket.io-client": "^2.1.1",
-    "vue": "^2.5.16",
-    "vue-class-component": "^6.0.0",
-    "vue-property-decorator": "^7.0.0",
-    "vue-router": "^3.0.1"
-  },
-  "devDependencies": {
-    "@types/socket.io-client": "^1.4.32",
-    "@vue/cli-plugin-babel": "^3.0.0-rc.5",
-    "@vue/cli-plugin-typescript": "^3.0.0-rc.5",
-    "@vue/cli-service": "^3.0.0-rc.5",
-    "node-sass": "^4.9.2",
-    "sass-loader": "^7.0.3",
-    "vue-template-compiler": "^2.5.16"
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ]
+    "name": "tweet-feed",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "serve": "vue-cli-service serve",
+        "build": "vue-cli-service build",
+        "lint": "vue-cli-service lint"
+    },
+    "dependencies": {
+        "@feathersjs/feathers": "^3.1.7",
+        "@feathersjs/socketio-client": "^1.1.0",
+        "@fortawesome/fontawesome-svg-core": "^1.2.2",
+        "@fortawesome/free-solid-svg-icons": "^5.2.0",
+        "@fortawesome/vue-fontawesome": "^0.1.1",
+        "@types/bootstrap": "^4.1.2",
+        "@types/feathersjs__feathers": "^3.0.4",
+        "@types/feathersjs__socketio-client": "^1.0.1",
+        "bootstrap": "^4.1.2",
+        "font-awesome": "^4.7.0",
+        "moment": "^2.22.2",
+        "socket.io-client": "^2.1.1",
+        "stylelint": "^9.4.0",
+        "stylelint-config-recommended": "^2.1.0",
+        "stylelint-config-standard": "^18.2.0",
+        "vue": "^2.5.16",
+        "vue-class-component": "^6.0.0",
+        "vue-property-decorator": "^7.0.0",
+        "vue-router": "^3.0.1"
+    },
+    "devDependencies": {
+        "@types/socket.io-client": "^1.4.32",
+        "@vue/cli-plugin-babel": "^3.0.0-rc.5",
+        "@vue/cli-plugin-typescript": "^3.0.0-rc.5",
+        "@vue/cli-service": "^3.0.0-rc.5",
+        "node-sass": "^4.9.2",
+        "sass-loader": "^7.0.3",
+        "vue-template-compiler": "^2.5.16"
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not ie <= 8"
+    ]
 }

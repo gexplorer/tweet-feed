@@ -12,6 +12,7 @@ import {
     faHashtag,
     faStar,
     faTrash,
+    faThumbtack,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
@@ -24,6 +25,7 @@ library.add(
     faListOl,
     faHashtag,
     faStar,
+    faThumbtack,
     faTrash);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
