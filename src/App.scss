@@ -9,12 +9,11 @@ $green: #28a745 !default;
 $teal: #20c997 !default;
 $cyan: #17a2b8 !default;
 
+$border-radius: .5rem;
+
 $spacer: .5rem !default;
 
 $card-spacer-y: .5rem !default;
 $card-spacer-x: .75rem !default;
 
 @import '~bootstrap/scss/bootstrap';
-
-$fa-font-path: 'font-awesome/fonts';
-// @import '~font-awesome/scss/font-awesome';

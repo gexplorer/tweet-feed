@@ -7,14 +7,14 @@ $modal-bg: rgba(0, 0, 0, .7);
   }
 }
 
-$morph-delay: 1s;
+$morph-delay: 1000ms;
 .morph {
   overflow: hidden;
   &-enter {
     &-active {
       max-height: 1px;
       opacity: 0;
-      transition: all 2s;
+      transition: all $morph-delay;
     }
 
     &-to {
@@ -26,7 +26,7 @@ $morph-delay: 1s;
   &-leave {
     &-active {
       max-height: 300px;
-      transition: all 500ms;
+      transition: all $morph-delay;
     }
 
     &-to {
@@ -36,7 +36,7 @@ $morph-delay: 1s;
   }
 }
 
-
+$slide-delay: 500ms;
 .slide {
   &-enter {
     transform: translateY(-50px);
@@ -44,7 +44,7 @@ $morph-delay: 1s;
     &-active {
       max-height: 1px;
       opacity: 0;
-      transition: max-height 1s, opacity 1s;
+      transition: max-height $slide-delay, opacity $slide-delay;
     }
 
     &-to {
@@ -56,7 +56,7 @@ $morph-delay: 1s;
   &-leave {
     &-active {
       max-height: 500px;
-      transition: max-height 1s;
+      transition: max-height $slide-delay;
     }
 
     &-to {

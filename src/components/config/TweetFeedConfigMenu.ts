@@ -4,6 +4,10 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 export default class TweetFeedConfigMenu extends Vue {
     @Prop() public active!: boolean;
 
+    public add() {
+        this.$emit('add');
+    }
+
     public start() {
         this.$emit('start');
     }

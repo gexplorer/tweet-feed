@@ -3,3 +3,23 @@
   background-size: contain;
   background-repeat: no-repeat;
 }
+
+.card {
+  .display {
+    &-1 {
+      font-size: 5rem;
+    }
+
+    &-2 {
+      font-size: 4rem;
+    }
+
+    &-3 {
+      font-size: 3rem;
+    }
+
+    &-4 {
+      font-size: 2rem;
+    }
+  } 
+}

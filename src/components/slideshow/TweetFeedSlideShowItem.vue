@@ -1,8 +1,8 @@
 <template>
     <div :class="hasImageClass"
          v-if="tweet"
-         class="tweet-slideshow-item position-absolute w-100 p-5 rounded-2">
-        <div class="card h-50">
+         class="tweet-slideshow-item position-absolute w-100 p-5">
+        <div class="card h-100 rounded-5 p-4">
             <div class="card-body">
                 <img :src="tweet.avatar"
                      alt="Avatar"

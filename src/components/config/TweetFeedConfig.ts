@@ -2,6 +2,9 @@ import { Component, Vue } from 'vue-property-decorator';
 import { SimpleTweet } from '../../SimpleTweet';
 import TweetFeedConfigItem from './TweetFeedConfigItem';
 import TweetFeedConfigMenu from './TweetFeedConfigMenu';
+import TweetFeedConfigInputModal from './TweetFeedConfigInputModal';
+import TweetFeedConfigStartModal from './TweetFeedConfigStartModal';
+
 import io from 'socket.io-client';
 import { Application, Service  } from '@feathersjs/feathers';
 
@@ -12,18 +15,18 @@ import socketio from '@feathersjs/socketio-client';
     components: {
         TweetFeedConfigItem,
         TweetFeedConfigMenu,
+        TweetFeedConfigInputModal,
+        TweetFeedConfigStartModal,
     },
 })
 export default class TweetFeedConfig extends Vue {
     public online: boolean = false;
-    public main: boolean = false;
-    public timer: number = 0;
     public active: boolean = false;
     public simpleTweets: SimpleTweet[] = [];
-    public max: number = 5;
-    public delay: number = 3000;
-    public blacklist: string[] = [];
+    public max: number = 10;
+    public delay: number = 10000;
     private starting: boolean = false;
+    private adding: boolean = false;
 
     private socket: any = io.connect(':3030');
     private app: Application = feathers();
@@ -49,10 +52,10 @@ export default class TweetFeedConfig extends Vue {
         this.tweetService
             .on('patched', (tweet: SimpleTweet) => {
                 const index = this.simpleTweets.findIndex((t) => t._id === tweet._id);
-
                 if (index >= 0) {
                     this.$set(this.simpleTweets[index], 'blocked', tweet.blocked);
                     this.$set(this.simpleTweets[index], 'selected', tweet.selected);
+                    this.$set(this.simpleTweets[index], 'starred', tweet.starred);
                 }
             });
 
@@ -68,7 +71,10 @@ export default class TweetFeedConfig extends Vue {
         this.tweetService
             .find({
                 query: {
-                    $sort: { date: -1 },
+                    $sort: {
+                        starred: -1,
+                        date: -1,
+                    },
                 },
             })
             .then((tweets) => {
@@ -92,7 +98,15 @@ export default class TweetFeedConfig extends Vue {
     get activeTweets(): SimpleTweet[] {
         return this.simpleTweets
             .filter((tweet) => !tweet.blocked)
-            .sort((a, b) => a.date < b.date ? 1 : -1)
+            .sort((a, b) => {
+                if (a.starred && !b.starred) {
+                    return -1;
+                }
+                if (!a.starred && b.starred) {
+                    return 1;
+                }
+                return a.date > b.date ? -1 : 1;
+            })
             .slice(0, this.max);
     }
 
@@ -110,17 +124,21 @@ export default class TweetFeedConfig extends Vue {
 
     get nextTweets(): SimpleTweet[] {
         return this.activeTweets
-            .filter((tweet, index) => index > this.selectedIndex);
+            .slice(0, this.selectedIndex)
+            .reverse();
     }
 
     get prevTweets(): SimpleTweet[] {
         return this.activeTweets
-            .filter((tweet, index) => index < this.selectedIndex)
-            .sort((a, b) => a.date > b.date ? 1 : -1);
+            .slice(this.selectedIndex + 1);
     }
 
     get modalClass(): string {
         return this.starting ? 'show' : '';
+    }
+
+    get inputClass(): string {
+        return this.adding ? 'show' : '';
     }
 
     public updateMax(value: number) {
@@ -131,13 +149,33 @@ export default class TweetFeedConfig extends Vue {
         this.delay = value;
     }
 
-    public start() {
+    public openAddModal() {
+        this.adding = true;
+    }
+
+    public closeAddModal() {
+        this.adding = false;
+    }
+
+    public add(text: string) {
+        this.closeAddModal();
+        this.tweetService.create({text});
+    }
+
+    public openStartModal() {
         this.starting = true;
         this.active = false;
     }
 
-    public doStart() {
+    public closeStartModal() {
         this.starting = false;
+    }
+
+    public start( {max, delay}: {max: number, delay: number}) {
+        this.closeStartModal();
+        this.max = max;
+        this.delay = delay;
+
         this.statusService
             .create({}, {query: {
                 max: this.max,
@@ -174,10 +212,17 @@ export default class TweetFeedConfig extends Vue {
             });
     }
 
-    public block(tweet: SimpleTweet) {
+    public blockTweet(tweet: SimpleTweet) {
         this.tweetService
             .patch(tweet._id, {
                 blocked: !tweet.blocked,
+            });
+    }
+
+    public starTweet(tweet: SimpleTweet) {
+        this.tweetService
+            .patch(tweet._id, {
+                starred: !tweet.starred,
             });
     }
 }

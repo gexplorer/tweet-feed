@@ -4,13 +4,14 @@ import { SimpleTweet } from '../../SimpleTweet';
 @Component
 export default class TweetFeedConfigItem extends Vue {
     @Prop() public tweet!: SimpleTweet;
-    @Prop({ default: false }) public selected!: boolean;
-    @Prop({ default: false }) public blocked!: boolean;
     @Prop({ default: false }) public block!: boolean;
     @Prop({ default: false }) public pin!: boolean;
 
-    constructor() {
-        super();
+    get starredIcon() {
+        return {
+            prefix: this.tweet.starred ? 'fas' : 'far',
+            iconName: 'star',
+        };
     }
 
     get hasImage() {
@@ -21,6 +22,12 @@ export default class TweetFeedConfigItem extends Vue {
         return {
             backgroundImage: `url('${this.tweet.photo}')`,
         };
+    }
+
+    public starTweet() {
+        this.$emit('star', {
+            tweet: this.tweet,
+        });
     }
 
     public blockTweet() {

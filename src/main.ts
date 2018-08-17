@@ -13,7 +13,15 @@ import {
     faStar,
     faTrash,
     faThumbtack,
+    faPlus,
+    faDesktop,
+    faCommentAlt,
 } from '@fortawesome/free-solid-svg-icons';
+
+import {
+    faStar as faStarRegular,
+} from '@fortawesome/free-regular-svg-icons';
+
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 library.add(
@@ -25,8 +33,12 @@ library.add(
     faListOl,
     faHashtag,
     faStar,
+    faStarRegular,
     faThumbtack,
-    faTrash);
+    faTrash,
+    faPlus,
+    faDesktop,
+    faCommentAlt);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
 Vue.config.productionTip = false;
